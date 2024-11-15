@@ -1,0 +1,40 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch: 
+    inputs:
+      logLevel:
+        description: 'why'
+        required: false
+        default: 'build'
+        type: choice
+        options:
+        - build
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+    - name: check out git
+      run: cd /home/runner/work/SimpleVirtualDisplay/SimpleVirtualDisplay && git submodule update --init --recursive
+    - name: cd into android dir && execute permission for gradlew
+      run: cd /home/runner/work/SimpleVirtualDisplay/SimpleVirtualDisplay && chmod +x gradlew
+    - name: Build with Gradle
+      run: cd /home/runner/work/SimpleVirtualDisplay/SimpleVirtualDisplay && ./gradlew build
+    - uses: actions/upload-artifact@v3
+      with:
+        name: builds
+        path: /home/runner/work/SimpleVirtualDisplay/SimpleVirtualDisplay/app/build/outputs/apk/*/*.apk
